@@ -1,2 +1,2 @@
 Hello
-[Link to calculator](../the_odin_project/calculator/)
+[Link to calculator](/calculator/)
