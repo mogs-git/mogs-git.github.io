@@ -43,3 +43,29 @@ let descriptions = [
 "A simple calculator built using HTML, CSS and vanilla JS.",
 "A generative art project built using p5.js."
 ]
+
+let tags = ["technical", "art", "game"];
+
+let nav_links = ["home", "about", "writings"]
+const navbar_top = document.getElementById("links");
+
+nav_links.forEach((link) => {
+	let el = document.createElement("li");
+	el.textContent = link;
+	navbar_top.appendChild(el);
+	el.addEventListener("click", () => {
+		if (link === "home") {
+			window.open("http://mogs-git.github.io");
+		} else {
+			window.open("http://mogs-git.github.io/"+link+"/");
+		}
+	})
+	el.addEventListener("mouseover", (e) => {
+		e.target.classList.add("link_hover");
+	})
+	el.addEventListener("mouseout", (e) => {
+		e.target.classList.remove("link_hover");
+	})
+
+})
+

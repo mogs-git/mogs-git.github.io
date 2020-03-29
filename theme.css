@@ -52,3 +52,20 @@ body {
 	transition: opacity 2s ease-in-out;
 
 }
+
+.nav {
+	display: flex;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.nav li {
+	margin-right: 20px;
+}
+
+.link_hover {
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
+}
