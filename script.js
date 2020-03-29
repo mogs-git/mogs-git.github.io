@@ -56,7 +56,7 @@ nav_links.forEach((link) => {
 	navbar_top.appendChild(el);
 	el.addEventListener("click", () => {
 		if (link === "home") {
-			window.open("http://mogs-git.github.io");
+			window.open("http://mogs-git.github.io", "_self");
 		} else {
 			window.open("http://mogs-git.github.io/"+link+"/");
 		}
