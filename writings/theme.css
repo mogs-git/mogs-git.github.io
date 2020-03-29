@@ -1,0 +1,15 @@
+body {
+	font-family: 'Lato', sans-serif;
+}
+
+th, td {
+	padding: 15px;
+ 	border-radius: 3px;
+ 	font-size: 20px;
+}
+
+
+.link_hover {
+	background-color: #8eb0e8;	
+	cursor: pointer;
+}
