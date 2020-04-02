@@ -59,7 +59,7 @@ nav_links.forEach((link) => {
 		if (link === "home") {
 			window.open("http://mogs-git.github.io", "_self");
 		} else {
-			window.open("http://mogs-git.github.io/"+link+"/");
+			window.open("http://mogs-git.github.io/"+link);
 		}
 	})
 	el.addEventListener("mouseover", (e) => {
