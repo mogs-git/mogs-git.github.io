@@ -43,7 +43,7 @@ let descriptions = [
 "A simple calculator built using HTML, CSS and vanilla JS.",
 "A generative art project built using p5.js.",
 "A tool to find Bezier control point coordinates written in p5.js",
-"An ongoing generative art project written in p5.js"
+"An ongoing generative art project written in p5.js."
 ]
 
 let tags = ["technical", "art", "game"];
