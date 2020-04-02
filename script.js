@@ -1,6 +1,6 @@
-let projects = ["Calculator", "Perlin vines", "Relative Bezier"];
-let links = ["http://mogs-git.github.io//calculator/", "http://mogs-git.github.io//perlin_vine/", "http://mogs-git.github.io/bezier/"];
-let background_colours = ["hsl(101, 61%, 25%)", "hsl(0, 61%, 30%)",  "hsl(25, 61%, 30%)"];
+let projects = ["Calculator", "Perlin vines", "Relative Bezier", "Forest"];
+let links = ["http://mogs-git.github.io//calculator/", "http://mogs-git.github.io//perlin_vine/", "http://mogs-git.github.io/bezier/", "http://mogs-git.github.io/garden_banner/"];
+let background_colours = ["hsl(216, 77%, 29%)", "hsl(0, 61%, 30%)",  "hsl(25, 61%, 30%)", "hsl(101, 61%, 25%)"];
 
 const welcome_container = document.getElementById("welcome_container");
 const projects_container = document.getElementById("projects_container");
@@ -42,7 +42,8 @@ for (let i = 0; i < projects.length; i++) {
 let descriptions = [
 "A simple calculator built using HTML, CSS and vanilla JS.",
 "A generative art project built using p5.js.",
-"A tool to find Bezier control point coordinates written in p5.js"
+"A tool to find Bezier control point coordinates written in p5.js",
+"An ongoing generative art project written in p5.js"
 ]
 
 let tags = ["technical", "art", "game"];
