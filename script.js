@@ -1,7 +1,13 @@
-let projects = ["Calculator", "Perlin vines", "Relative Bezier", "Forest", "Flower maker"];
+let projects = ["Calculator", "Perlin vines", "Relative Bezier", "Forest", "Flower maker", "Raindrops"];
 let links = ["http://mogs-git.github.io//calculator/", "http://mogs-git.github.io//perlin_vine/", "http://mogs-git.github.io/bezier/", "http://mogs-git.github.io/garden_banner/",
-"http://mogs-git.github.io/flower_maker/"];
-let background_colours = ["hsl(216, 77%, 29%)", "hsl(0, 61%, 30%)",  "hsl(25, 61%, 30%)", "hsl(101, 61%, 25%)", "hsl(312, 49%, 35%)"];
+"http://mogs-git.github.io/flower_maker/", "http://mogs-git.github.io/raindrops/"];
+let background_colours = [
+"hsl(216, 77%, 29%)", 
+"hsl(0, 61%, 30%)", 
+"hsl(25, 61%, 30%)", 
+"hsl(101, 61%, 25%)", 
+"hsl(312, 49%, 35%)", 
+"hsl(197, 100%, 29%)"];
 
 const welcome_container = document.getElementById("welcome_container");
 const projects_container = document.getElementById("projects_container");
@@ -45,7 +51,8 @@ let descriptions = [
 "A generative art project built using p5.js.",
 "A tool to find Bezier control point coordinates written in p5.js",
 "An ongoing generative art project written in p5.js.",
-"Make flowers by changing the petal shape and angle of rotation."
+"Make flowers by changing the petal shape and angle of rotation.",
+"Another art project in p5.js."
 ]
 
 let tags = ["technical", "art", "game"];
