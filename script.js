@@ -45,26 +45,15 @@ function brighten_hsl_string(s) {
 	return s.join("");
 } 
 
-// DOM 
+// Creating DOM elements 
 
+// Welcome container
 const welcome_container = document.getElementById("welcome_container");
 let desc_node = document.createElement("p");
 desc_node.classList.add("desc");
 welcome_container.appendChild(desc_node);
 
-n_projects = projects.length;
-projects_per_sheet = 6;
-n_project_subcontainers = Math.ceil(n_projects/projects_per_sheet);
 const projects_container = document.getElementById("projects_container");
-
-let next_button = document.createElement("button")
-next_button.setAttribute("id", "next")
-next_button.style.position="absolute";
-next_button.style.bottom="5px";
-next_button.style.right="5px";
-next_button.textContent ="next";
-next_button.style.zIndex=5;
-projects_container.appendChild(next_button);
 
 const projects_subcontainer_a = document.createElement("div");
 const content_a = document.createElement("div");
@@ -83,6 +72,9 @@ projects_subcontainer_b.appendChild(content_b)
 let parentBounds = projects_container.getBoundingClientRect();
 let carousel_position = 0;
 let current_subcontainer = "a";
+n_projects = projects.length;
+projects_per_sheet = 6;
+n_project_subcontainers = Math.ceil(n_projects/projects_per_sheet);
 
 
 let i_start = projects_per_sheet * carousel_position;
@@ -139,68 +131,89 @@ for (let i = i_start; i < i_end; i++) {
 	}
 }
 
+console.log(projects_subcontainer_a.offsetHeight)
+projects_container.style.height = projects_subcontainer_a.offsetHeight + 50 + "px"
+let next_button = document.createElement("button")
+next_button.setAttribute("id", "next")
+next_button.textContent = "more projects";
+projects_container.appendChild(next_button);
+next_button.addEventListener("mouseover", () => {
+	next_button.textContent = "\u27F6";
+	backgroundColor = "#e7e7e7";
+})
+next_button.addEventListener("mouseout", () => {
+	next_button.textContent = "more projects";
+	backgroundColor = "rgba(0,0,0,0)";
+})
 projects_subcontainer_b.style.left = -projects_subcontainer_b.offsetWidth-parentBounds.left + "px"
 
-next_button.addEventListener("click", () => {
-console.log("OI")
-	let project_aBounds = projects_subcontainer_a.getBoundingClientRect();
-	let project_bBounds = projects_subcontainer_b.getBoundingClientRect();
-
-	console.log(current_subcontainer)
-	if (current_subcontainer == "a") {	
-		let pos = 0;
-		console.log(pos)
-		let id = setInterval(frame, 2);
-		function frame() {
-			if (pos >= innerWidth) {
-			  clearInterval(id);
-			  projects_subcontainer_a.style.left = `-${projects_subcontainer_a.offsetWidth + parentBounds.left}px`;
-			} else {
-			  pos+=5; 
-			  projects_subcontainer_a.style.left = pos + "px"; 
-			}
-		}
-			let id2 = setInterval(frame2, 2);
-			pos2 = 0;
-			let start = -projects_subcontainer_b.offsetWidth - parentBounds.left*2 //project_bBounds.left
-			function frame2() {
-				if (project_bBounds.left + pos2  > parentBounds.left*2) {
-					clearInterval(id2);
-				}	else {
-					pos2+=5
-					projects_subcontainer_b.style.left = start + pos2 + "px";
+let locked = false;
+function unlock () {
+    locked = false;
+}
+function handle_click() {
+	if (!locked) {
+		locked = true;
+        setTimeout(unlock, 1500);
+		let project_aBounds = projects_subcontainer_a.getBoundingClientRect();
+		let project_bBounds = projects_subcontainer_b.getBoundingClientRect();
+		
+		if (current_subcontainer == "a") {	
+			let pos = 0;
+			console.log(pos)
+			let id = setInterval(frame, 2);
+			function frame() {
+				if (pos >= innerWidth) {
+				  clearInterval(id);
+				  projects_subcontainer_a.style.left = `-${projects_subcontainer_a.offsetWidth + parentBounds.left}px`;
+				} else {
+				  pos+=5; 
+				  projects_subcontainer_a.style.left = pos + "px"; 
 				}
 			}
-		
-	} else {
-		let pos = 0;
-		let id = setInterval(frame, 2);
-		function frame() {
-			if (pos > innerWidth) {
-			  clearInterval(id);
-			  projects_subcontainer_b.style.left = `-${projects_subcontainer_b.offsetWidth+ parentBounds.left}px`;
-			} else {
-			  pos+=5; 
-			  projects_subcontainer_b.style.left = pos + "px"; 
+				let id2 = setInterval(frame2, 2);
+				pos2 = 0;
+				let start = -projects_subcontainer_b.offsetWidth - parentBounds.left*2 //project_bBounds.left
+				function frame2() {
+					if (project_bBounds.left + pos2  > parentBounds.left*2) {
+						clearInterval(id2);
+					}	else {
+						pos2+=5
+						projects_subcontainer_b.style.left = start + pos2 + "px";
+					}
+				}
+			
+		} else {
+			let pos = 0;
+			let id = setInterval(frame, 2);
+			function frame() {
+				if (pos > innerWidth) {
+				  clearInterval(id);
+				  projects_subcontainer_b.style.left = `-${projects_subcontainer_b.offsetWidth+ parentBounds.left}px`;
+				} else {
+				  pos+=5; 
+				  projects_subcontainer_b.style.left = pos + "px"; 
+				}
+			}
+
+			let id2 = setInterval(frame2, 2);
+			pos2 = 0;
+			let start = -projects_subcontainer_a.offsetWidth -parentBounds.left*2
+			function frame2() {
+				if (project_aBounds.left + pos2 > parentBounds.left*2) {
+					clearInterval(id2);
+				} else {
+					pos2+=5
+					projects_subcontainer_a.style.left = (start + pos2) + "px";
+				}
 			}
 		}
 
-		let id2 = setInterval(frame2, 2);
-		pos2 = 0;
-		let start = -projects_subcontainer_a.offsetWidth -parentBounds.left*2
-		function frame2() {
-			if (project_aBounds.left + pos2 > parentBounds.left*2) {
-				clearInterval(id2);
-			} else {
-				pos2+=5
-				projects_subcontainer_a.style.left = (start + pos2) + "px";
-			}
-		}
+	  current_subcontainer == "a" ? (current_subcontainer = "b") : (current_subcontainer = "a")
+	  carousel_position > n_project_subcontainers-1 ? (carousel_position = 0) : (carousel_position += 1)
 	}
-
-  current_subcontainer == "a" ? (current_subcontainer = "b") : (current_subcontainer = "a")
-  carousel_position > n_project_subcontainers-1 ? (carousel_position = 0) : (carousel_position += 1)
-})
+}
+next_button.addEventListener("click", handle_click)
 
 let tags = ["technical", "art", "game"];
 

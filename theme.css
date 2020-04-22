@@ -1,11 +1,8 @@
 body {
 	font-family: 'Lato', sans-serif;
-		overflow: hidden;
-
 }
 
 .slide {
-	float: left;
 	left: 0%;
 	position: absolute;
 	width: 100%;
@@ -19,6 +16,21 @@ body {
 	grid-gap: 10px;
 	margin: 15px auto;
 	height: 100%;
+}
+
+#next {
+	position: absolute;
+	content: "More projects";
+	width: 60px;
+	bottom: 5px;
+	right: 10px;
+	z-index: 5;
+	border: none;
+	font-size: 20px;
+	background-color: rgba(0,0,0,0);
+	font-style: italic;
+  	color: black;
+  	transition-duration: 0.4s;
 }
 
 #main_container {
@@ -37,9 +49,9 @@ body {
 }
 
 #projects_container {
-	display: flex;
+	display: inline-block;
 	position: relative;
-	justify-content: center;
+	height: 100%;
 }
 
 .project_item {
