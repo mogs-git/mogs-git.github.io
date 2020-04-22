@@ -48,18 +48,17 @@ for (let i = 0; i < work_items.length; i++) {
 		subitem.textContent = work_items[i].extended_description;
 		subitem.classList.toggle("expandable")
 		subitem.classList.toggle("expandable_clicked")
+		subitem.classList.remove("expandable_hover")
 	})
 	item.addEventListener("mouseover", () => {
 		if (!subitem.classList.contains("expandable_clicked")) {
 			subitem.textContent = (work_items[i].extended_description).substr(0,20)+"... (click for more)"
-			subitem.classList.remove("expandable")
 			subitem.classList.add("expandable_hover")
 		}
 	})
 	item.addEventListener("mouseout", () => {
 		if (!subitem.classList.contains("expandable_clicked")) {
 			(subitem.textContent != work_items[i].extended_description) ? (subitem.textContent = "") : null
-			subitem.classList.add("expandable")
 			subitem.classList.remove("expandable_hover")
 		}
 	})
