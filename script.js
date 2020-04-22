@@ -139,11 +139,15 @@ next_button.textContent = "more projects";
 projects_container.appendChild(next_button);
 next_button.addEventListener("mouseover", () => {
 	next_button.textContent = "\u27F6";
-	backgroundColor = "#e7e7e7";
+})
+next_button.addEventListener("click", () => {
+	next_button.textContent = "\u27F6";
+	next_button.style.backgroundColor = "#e7e7e7";
+	next_button.style.outline = "none";
 })
 next_button.addEventListener("mouseout", () => {
 	next_button.textContent = "more projects";
-	backgroundColor = "rgba(0,0,0,0)";
+	next_button.style.backgroundColor = "rgba(0,0,0,0)";
 })
 projects_subcontainer_b.style.left = -projects_subcontainer_b.offsetWidth-parentBounds.left + "px"
 
