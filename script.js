@@ -14,7 +14,7 @@ let links = [
 "http://mogs-git.github.io/garden_banner/",
 "http://mogs-git.github.io/flower_maker/", 
 "http://mogs-git.github.io/raindrops/",
-""];
+"http://mogs-git.github.io/circle_waves/"];
 
 let background_colours = [
 "hsl(216, 77%, 29%)", 
