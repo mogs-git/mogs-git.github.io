@@ -26,7 +26,7 @@ let background_colours = [
 "hsl(312, 49%, 35%)", 
 "hsl(197, 100%, 29%)",
 "hsl(296, 100%, 26%)",
-"hsl(28, 36%, 33%)"];
+"hsl(29, 100%, 36%)"];
 
 let descriptions = [
 "A simple calculator built using HTML, CSS and vanilla JS.",
