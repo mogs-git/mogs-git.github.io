@@ -5,7 +5,8 @@ let projects = [
 "Forest", 
 "Flower maker", 
 "Raindrops",
-"Circle waves"];
+"Circle waves",
+"Brownian trees"];
 
 let links = [
 "http://mogs-git.github.io/calculator/", 
@@ -14,7 +15,8 @@ let links = [
 "http://mogs-git.github.io/garden_banner/",
 "http://mogs-git.github.io/flower_maker/", 
 "http://mogs-git.github.io/raindrops/",
-"http://mogs-git.github.io/circle_waves/"];
+"http://mogs-git.github.io/circle_waves/",
+"http://mogs-git.github.io/brownian_trees/"];
 
 let background_colours = [
 "hsl(216, 77%, 29%)", 
@@ -23,7 +25,8 @@ let background_colours = [
 "hsl(101, 61%, 25%)", 
 "hsl(312, 49%, 35%)", 
 "hsl(197, 100%, 29%)",
-"hsl(296, 100%, 26%)"];
+"hsl(296, 100%, 26%)",
+"hsl(28, 36%, 33%)"];
 
 let descriptions = [
 "A simple calculator built using HTML, CSS and vanilla JS.",
@@ -32,7 +35,8 @@ let descriptions = [
 "An ongoing generative art project written in p5.js.",
 "Make flowers by changing the petal shape and angle of rotation.",
 "Another art project in p5.js.",
-"Make waves using dots rotating on circles."
+"Make waves using dots rotating on circles.",
+"Random walkers become stuck to stationary 'trees' to form 'branches'."
 ]
 
 // Utility functions //
