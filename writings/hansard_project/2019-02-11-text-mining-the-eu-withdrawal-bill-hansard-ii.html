@@ -1,0 +1,522 @@
+<script src="./rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="./rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="./rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="./rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="./rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="./rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="./rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="fonts.css">
+
+<div id="hansard-text-analysis-part-3" class="section level1">
+<h1>Hansard Text Analysis (Part 3)</h1>
+<p>In my previous articles (<a href="../../04/hansard-text-analysis-part-1/" target="_blank">1</a>, <a href="../../05/text-mining-the-eu-withdrawal-bill-hansard" target="_blank">2</a>), I explored how we can use the R programming language and some great packages for text mining to investigate a British <a href="https://hansard.parliament.uk/lords/2017-03-01/debates/EE9DF3A9-2E05-4568-8CF8-A61F11172391/EuropeanUnion(NotificationOfWithdrawal)Bill" target="_blank">Parliamentary Hansard</a> about withdrawing from the EU. Taking inspiration again from Julia Silge and David Robinson’s brilliant book on <a href="https://www.tidytextmining.com/">tidy text mining</a>, this time we will try out more advanced analytical methods and get a bit more creative with the way we extract information from the text. Fair warning: <strong>this post is long</strong>.</p>
+<div id="bigrams" class="section level2">
+<h2>Bigrams</h2>
+<p>Last time, we counted individuals words from each speech. Speeches are associated with categorical variables like the speaker, political party or gender. But why just split the text up into individual words? We know that some words naturally appear in groups (Mr. Smith, United Kingdom, European Union), so we might want to count groups of words- collectively known as “n-grams”. We are specifically going to count pairs of words, which are known to text-mining aficionados as “bigrams” (which I have a habit of reading as <em>big rams</em>, making big rams a big ram).</p>
+<pre class="r"><code>appearances_tib %&gt;%
+  mutate(speeches = str_sub(speeches, 1, 100)) %&gt;% # Shorten speeches for viewer&#39;s pleasure
+  head(3) %&gt;% # display the first three rows
+  DT::datatable() # Formats the table nicely (many thanks to the DT package).</code></pre>
+<div id="htmlwidget-1" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","data":[["1","2","3"],["Baroness Hayter of Kentish Town","Viscount Hailsham","Baroness Ludford"],["(Lab)","(Con)","(LD)"],["Hayter","Hailsham","Ludford"],["female","male","female"],["My Lords, it is a particular pleasure for me on St David’s Day to be opening this session on the Bil","My Lords, in supporting this group of new clauses and amendments, I shall vote for any one of them t","My Lords, in supporting Amendment 9B I shall speak also to Amendments 25 and 41. It is a pleasure to"],["(Lab)","(Con)","(LD)"],[1,2,3]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>party<\/th>\n      <th>surname<\/th>\n      <th>gender<\/th>\n      <th>speeches<\/th>\n      <th>party_f<\/th>\n      <th>speech_id<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":7},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>In case you’ve forgotten since last time, here is a snippet from our main data table for the analysis scraped from the Hansard plaintext by yours truly. We’ve got columns for the speaker, party, gender, speech, party again (as a factor for plotting purposes, and with minor parties condensed into “other”) and the speech_id, which just describes the sequence speeches happened in.</p>
+<p>Now let’s translate the words in those speeches into bigrams:</p>
+<pre class="r"><code># Each row corresponds to a bigram from each speech now.
+bigrams_tibble &lt;- appearances_tib %&gt;% 
+  unnest_tokens(bigram, speeches, token = &quot;ngrams&quot;, n = 2) 
+
+bigrams_tibble %&gt;%
+  select(name, speech_id, bigram) %&gt;%
+  head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   name                           speech_id bigram   
+##   &lt;chr&gt;                              &lt;int&gt; &lt;chr&gt;    
+## 1 Baroness Bowles of Berkhamsted       124 my lords 
+## 2 Baroness Bowles of Berkhamsted       124 lords i  
+## 3 Baroness Bowles of Berkhamsted       124 i am     
+## 4 Baroness Bowles of Berkhamsted       124 am in    
+## 5 Baroness Bowles of Berkhamsted       124 in favour
+## 6 Baroness Bowles of Berkhamsted       124 favour of</code></pre>
+<p>A bit of wrangling removes bigrams containing “stop words”, which are just commonly used words like “and”, “the”, “it”.</p>
+<pre class="r"><code># For our analysis, we don&#39;t want bigrams like &quot;I am&quot;.
+# We&#39;re going to remove all bigrams that contain a stop word (see glossary).
+
+# put words from each bigram into separate columns
+bigrams_separated &lt;- bigrams_tibble %&gt;%
+  separate(bigram, c(&quot;word1&quot;, &quot;word2&quot;), sep = &quot; &quot;)
+
+# filter out rows where either word from the bigram is a stop word
+bigrams_filtered &lt;- bigrams_separated %&gt;%
+  filter(!word1 %in% stop_words$word) %&gt;%
+  filter(!word2 %in% stop_words$word)
+
+# we can then put both words back into the same column if we feel like it
+# bigrams_united &lt;- bigrams_filtered %&gt;%
+#   unite(bigram, word1, word2, sep = &quot; &quot;)
+
+# For now, we will count each pair of words
+(bigram_counts &lt;- bigrams_filtered %&gt;% 
+  count(word1, word2, sort = TRUE)) %&gt;%
+  `[`(1:10,)</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    word1    word2               n
+##    &lt;chr&gt;    &lt;chr&gt;           &lt;int&gt;
+##  1 noble    lord              167
+##  2 european union             155
+##  3 lord     lord              133
+##  4 noble    lords              88
+##  5 article  50                 76
+##  6 noble    friend             69
+##  7 united   kingdom            65
+##  8 prime    minister           61
+##  9 eu       citizens           59
+## 10 devolved administrations    41</code></pre>
+<p>Now we have a table containing the <strong>raw counts</strong> of every bigram in the Hansard. Take a peak and see which occur most. <em>“Noble Lord”</em> is a classic way of introducing another Lord in a speech in the House of Lords. <em>Article 50</em> is a nice piece of writing detailing that the UK is going to leave the EU (sadface). <em>Devolved administrations</em> is another UK specific piece of lingo, meaning the governmental institutions of Wales, Scotland and Northern Ireland. Most of the other common bigrams are pretty self-explanatory.</p>
+<p>Now let’s visualise the bigrams as a network, where each node is a word. The edges tell us which words are occur consecutively (i.e. as bigrams) and how often that bigram appeared (the strength of the line).</p>
+<pre class="r"><code>library(igraph)
+bigram_graph &lt;- bigram_counts %&gt;%
+  filter(n &gt; 5) %&gt;%
+  graph_from_data_frame(set.seed(2019))
+
+library(ggraph)
+ggraph(bigram_graph, layout = &quot;fr&quot;) +
+  geom_edge_link(aes(edge_alpha = log(n)), show.legend=F) +
+  geom_node_point() +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  scale_edge_alpha(range = c(0.5,1)) +
+  theme_void()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-5"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-5-1.png" alt="To get this network, I dropped every pair of words that appeared less than five times in the whole Hansard. Remaining words are placed on the graph and lines connected between the ones that occur together in pairs. The strength of the line tells us how often the pair of words were used. An algorithm sorts out the points so that connected nets of words are plotted close to one another and not overlapping with other nets (Thanks [igraph](https://igraph.org/r/) and [ggraph](https://github.com/thomasp85/ggraph)!)." width="960" />
+<p class="caption">
+Figure 1: To get this network, I dropped every pair of words that appeared less than five times in the whole Hansard. Remaining words are placed on the graph and lines connected between the ones that occur together in pairs. The strength of the line tells us how often the pair of words were used. An algorithm sorts out the points so that connected nets of words are plotted close to one another and not overlapping with other nets (Thanks <a href="https://igraph.org/r/">igraph</a> and <a href="https://github.com/thomasp85/ggraph">ggraph</a>!).
+</p>
+</div>
+<p>There is a lot of cool stuff going on in this graph. We can see how by pairing up words, they arrange themselves into <strong>families of topics</strong>. There are <em>personal declarative</em> words used to describe other MPs. There are <em>buzzwords/phrases</em> (cliff edge, bargaining chips). There are words related to the underlying <em>framework</em> of Hansard debates (amendments and clauses/subsections). There are different words associated with different <em>topics</em> (industries, human rights).</p>
+<p>From glancing at this graph, we can learn immediately the amendments discussed, industries that got mentioned and other issues that were discussed.</p>
+<p>This might help guide further exploration…</p>
+<p><br></p>
+</div>
+<div id="getting-context-on-the-amendments" class="section level2">
+<h2>Getting context on the Amendments</h2>
+<p>Perhaps we want to see more about how people speak about amendments. We can create a function which picks out sentences where our word of interest was used using some beautiful regular expressions.</p>
+<pre class="r"><code>wordInContext_sentence &lt;- function(txt, word) {
+  # lower case full string vector (txt) and search term (word).
+  txt %&gt;% str_extract_all(str_c(&quot;([^\\.\\?\\!]*\\s)&quot;, word, &quot;(\\s|,|:|;)[^\\.\\?\\!]*&quot;))
+}</code></pre>
+<pre class="r"><code>amendment_tib &lt;- appearances_tib %&gt;%
+  mutate(amendment = str_extract(str_to_lower(speeches), &quot;amendment [0-9][a-z0-9]+\\W&quot;),
+         amendment = str_sub(amendment, end = -2)) %&gt;% # grab an amendment mentioned and cut off trailing characters
+  select(-speeches) %&gt;%
+  mutate(explicit_mention = !is.na(amendment)) # mark speeches that mentioned amendments for later
+
+DT::datatable(head(amendment_tib))</code></pre>
+<p><div id="htmlwidget-2" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],["Baroness Hayter of Kentish Town","Viscount Hailsham","Baroness Ludford","Lord Howard of Lympne","Lord Howard of Lympne","Lord Richard"],["(Lab)","(Con)","(LD)","(Con)","(Con)","(Lab)"],["Hayter","Hailsham","Ludford","Howard","Howard","Richard"],["female","male","female","male","male","male"],["(Lab)","(Con)","(LD)","(Con)","(Con)","(Lab)"],[1,2,3,4,5,6],["amendment 9b",null,"amendment 9b",null,null,null],[true,false,true,false,false,false]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>party<\/th>\n      <th>surname<\/th>\n      <th>gender<\/th>\n      <th>party_f<\/th>\n      <th>speech_id<\/th>\n      <th>amendment<\/th>\n      <th>explicit_mention<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":6},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script> Here we have pulled out which amendments were mentioned in each speech. <em>(Keen readers might have noticed I used str_extract() rather than str_extract_all(). All this means is that for the time being we will just extract the first amendment mentioned in each speech to simplify later analysis).</em></p>
+<p>Now we are going to do something <strong>cheeky</strong>. Not every speech mentions an amendment. But maybe we can assume that the speeches that follow the previously mentioned amendment are also all referring to the same amendment as before. We can <em>populate</em> the amendment column by replacing missing values with the previous amendment mentioned. We’ll call these <strong>implicit mentions</strong>.</p>
+<pre class="r"><code>for (i in seq_along(amendment_tib$amendment)) {
+  if (!is.na(amendment_tib$amendment[i])) {
+    current &lt;- amendment_tib$amendment[i]
+  }
+  if (is.na(amendment_tib$amendment[i])) {
+    amendment_tib$amendment[i] &lt;- current
+  }
+}</code></pre>
+<p>We should do a quick sanity check to make sure that the number of <em>implicit mentions</em> of an amendment don’t stray too far from what we would expect based on the number of <em>explicit mentions</em>.</p>
+<pre class="r"><code># count explicit and implicit mentions of each amendment
+explicit_mentions &lt;- amendment_tib %&gt;%
+  filter(explicit_mention) %&gt;%
+  count(amendment)
+
+implicit_mentions &lt;- amendment_tib %&gt;%
+  count(amendment)
+
+# sanity check
+implicit_mentions %&gt;%
+  left_join(rename(explicit_mentions, n_explicit = n)) %&gt;%
+  ggplot(aes(n_explicit, n)) + xlab(&quot;N. explicit mentions&quot;) + ylab(&quot;N. implicit mentions&quot;) +
+  geom_point() +
+  theme_classic()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-9"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-9-1.png" alt="Amendment explicit vs implicit mentions." width="672" />
+<p class="caption">
+Figure 2: Amendment explicit vs implicit mentions.
+</p>
+</div>
+<p>The numbers appear to be correlated, let’s continue using the implicit mentions so we can access more data. What can we do with this data? One thing I’m interested in is <strong>if peers from different parties talked about each amendment different amounts</strong>. We could just plot the raw number of times each amendment was mentioned by each party, but because we know speakers from some parties spoke more than others we will instead use the proportion of speeches made about each amendment by each party. (I also removed amendments that were mentioned in less than five speeches, and only look at the groups that gave a good number of speeches).</p>
+<pre class="r"><code>amendment_tib %&gt;%
+  count(party, amendment) %&gt;%
+  group_by(amendment) %&gt;%
+  mutate(total_mentions = sum(n)) %&gt;%
+  filter(total_mentions &gt; 5) %&gt;%
+  group_by(party) %&gt;%
+  mutate(tot = sum(n), p = n/tot) %&gt;%
+  filter(party %in% c(&quot;(CB)&quot;, &quot;(Con)&quot;, &quot;(Lab)&quot;, &quot;(LD)&quot;)) %&gt;%
+  ggplot(aes(party, p)) + 
+  geom_col(aes(fill = amendment)) + 
+  scale_fill_brewer(type = &quot;qual&quot;, palette = 2) +
+  theme_classic()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-10"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-10-1.png" alt="Cross-party proportion of mentions of for each amendment." width="768" />
+<p class="caption">
+Figure 3: Cross-party proportion of mentions of for each amendment.
+</p>
+</div>
+<p>This is a pretty crude analysis, but is a nice summary of the importance of each amendment as a whole and to each party.</p>
+<p>One thing we can’t see here is whether speeches supported an amendment or spoke against it.</p>
+<p>I had a go at this, again using simple, maybe crude but otherwise transparent methods strung together. This involved pulling out sentences that included the word “amendment” to remove noise, then using sentiment analysis as a proxy for support or opposition. I wasn’t too happy with the result. Maybe this kind of classification is more appropriate for a supervised machine learning approach. My code is displayed below:</p>
+<pre class="r"><code># Use a home-made function &quot;words in context&quot;, to extract all the sentences from a speech containing a particular word. 
+targeted_sent &lt;- appearances_tib %&gt;%
+  mutate(sents_of_interest = map(speeches, ~unlist(wordInContext_sentence(str_to_lower(.), &quot;amendment&quot;)))) %&gt;%
+  select(name, party, speech_id, sents_of_interest) %&gt;% 
+  unnest() %&gt;%
+  mutate(sent_id = row_number())
+
+# Tokenise the sentences containing the word &quot;amendment&quot; for further analysis
+targeted_sent %&lt;&gt;% 
+  unnest_tokens(word, sents_of_interest)
+
+# Using a sentiment library, score each sentence.
+bing &lt;- get_sentiments(&quot;bing&quot;)
+
+my_stop_words &lt;- c(&quot;lord&quot;, &quot;lords&quot;, &quot;noble&quot;, &quot;baroness&quot;, &quot;lordship&quot;, &quot;minister&quot;, &quot;amendment&quot;, &quot;parliament&quot;, &quot;eu&quot;, &quot;uk&quot;, &quot;government&quot;, &quot;european&quot;, &quot;union&quot;, &quot;united&quot;, &quot;kingdom&quot;)
+
+# Count the number of positive and negative words in each &quot;amendment sentence&quot;
+amendment_counts &lt;- targeted_sent %&gt;%
+    filter(!word %in% my_stop_words) %&gt;%
+    inner_join(bing) %&gt;%
+    group_by(speech_id) %&gt;%
+    count(sentiment) 
+
+# Take those counts and classify the position of each sentence on the amendment.
+amendment_position &lt;- amendment_counts %&gt;%
+  spread(sentiment, n) %&gt;% 
+  mutate(negative = ifelse(is.na(negative), 0, negative),
+         positive = ifelse(is.na(positive), 0, positive),
+         position = ifelse(positive&gt;negative, &quot;support&quot;,
+                           ifelse(negative&gt;positive, &quot;oppose&quot;, &quot;neutral&quot;)))
+
+amendment_id &lt;- amendment_tib %&gt;% distinct(speech_id, amendment)
+
+amendment_position %&gt;%
+  left_join(amendment_id, by=&quot;speech_id&quot;) %&gt;%
+  filter(amendment %in% c(&quot;amendment 9b&quot;, &quot;amendment 21&quot;, &quot;amendment 25&quot;, &quot;amendment 39&quot;, &quot;amendment 17&quot;)) %&gt;%
+  count(amendment, position) %&gt;%
+  ggplot(aes(position, n)) + 
+  geom_col() + 
+  facet_wrap(~amendment) +
+  theme_classic()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-11"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-11-1.png" alt="Measuring support versus opposition for each amendment based on sentences containing the word 'amendment'" width="672" />
+<p class="caption">
+Figure 4: Measuring support versus opposition for each amendment based on sentences containing the word ‘amendment’
+</p>
+</div>
+<p>Why am I not happy with this result?</p>
+<p>Every step we did has a hole in it, and these problems compound until our results aren’t really valid.</p>
+<ul>
+<li>Sentences are short- sometimes there aren’t many “sentiment words” in them.</li>
+<li>The sentiment words available might not reflect the position of the sentence.</li>
+<li>The sentiment library (we used bing) isn’t perfect.</li>
+<li>I didn’t bother to take into account negation of words.</li>
+<li>Is a sentence with 4 positive words and 3 negative really in support of an amendment?</li>
+<li>The assumption that positive/negative is a good proxy for support/oppose.</li>
+</ul>
+<p>Below are illustrative examples…</p>
+<p>Of a true positive (A genuine opposition we recorded as oppositon):</p>
+<div id="htmlwidget-3" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"filter":"none","data":[["1"],["Lord Howard of Lympne"],[5],[1],["oppose"],["My Lords, I oppose this amendment on grounds that are rather different from those advanced by my noble friend. I submit that this amendment is wrong in principle, constitutionally improper and unnecessary. Your Lordships might think that given that it was proposed by the noble Lord, Lord Pannick, I am being rather courageous and perhaps foolhardy in suggesting that it is constitutionally improper but I hope to explain to your Lordships why I take that view. My view is based in particular on subsection (4) of the new clause. That would make possible—indeed it encourages—a never-ending situation in which the Government reach an agreement with the European Union and brings it to Parliament, Parliament rejects it, sends the Government back to the European Union, the Government come back to Parliament and Parliament rejects it again. The only way that process can be ended is by the Government having the power to bring the negotiations to an end. What would happen if the process envisaged by subsection (4) were to take place is the intrusion of Parliament into the negotiating process. That is why I say this amendment is constitutionally improper.\r"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>negative<\/th>\n      <th>positive<\/th>\n      <th>position<\/th>\n      <th>speeches<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>And a false positive (A “support” we recorded as opposition):</p>
+<div id="htmlwidget-4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"filter":"none","data":[["1"],["Lord Pannick"],[3],[0],["oppose"],["I am sorry, but the noble Lord is suggesting that I am bringing forward this amendment for some ulterior purpose. I voted to remain in the EU, but I entirely agree with the Government’s position that in the light of the referendum result, this country has to notify and has to leave the European Union.  I am not bringing forward this amendment with any ulterior purpose: my purpose is to ensure parliamentary sovereignty.\r"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>negative<\/th>\n      <th>positive<\/th>\n      <th>position<\/th>\n      <th>speeches<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>Ultimately, we can just look to see how peers voted (for example, on <a href="https://www.parliament.uk/business/publications/business-papers/lords/lords-divisions/?fd=2017-03-01&amp;td=2017-03-03&amp;dd=2017-03-01&amp;division=1">amendment 9b</a> or by reading the <a href="https://researchbriefings.parliament.uk/ResearchBriefing/Summary/CBP-7922">research briefings</a>). You could try and better annotate sentiments by taking into account negation or exploring the dependencies of words in the sentence using an approach like the one <a href="http://www.bnosac.be/index.php/blog/85-you-did-a-sentiment-analysis-with-tidytext-but-you-forgot-to-do-dependency-parsing-to-answer-why-is-something-positive-negative">described here</a>. Or you could try a supervised machine learning approach. At this point I’m really just throwing around ideas.</p>
+<p><br> <br></p>
+</div>
+<div id="topic-modelling" class="section level2">
+<h2>Topic modelling</h2>
+<p>Topic modelling, the basics of which is well explained in <a href="https://www.tidytextmining.com/topicmodeling.html" target="_blank">tidy text mining for R</a>), takes some documents and builds topics from the words in them, before assigning the probability that each document belongs in each topic. You have to input the number of topics that will be generated from your topics. Latent Dirichlet Allocation is the “generative process” that assigns words to topics, and topics to documents.</p>
+<p>Now there’s a vague description if there ever was one. This is a technique I was hesitant to use, having not had time to fully understand the maths behind LDA. But I’ve decided to ignore my fears of black boxes for now, and comfort myself with the fact that this whole thing I’m writing is only a proof of concept. One day I’ll get around to writing a full explanation of how LDA works for the layman.</p>
+<p>We’re going to use topic modelling to condense information from our speeches down into a selection of topics, not unlike what I tried to do using TF-IDF in a previous article. I’ve picked a beautifully arbitray 4 topics (actually, not completely arbitrary. This is based on observing the types of words that came out of our TF-IDF analysis in the <a href="../../05/text-mining-the-eu-withdrawal-bill-hansard" target="_blank">previous article</a>).</p>
+<pre class="r"><code>library(topicmodels)
+
+my_stop_words &lt;- c(&quot;lord&quot;, &quot;lords&quot;, &quot;noble&quot;, &quot;baroness&quot;, &quot;lordship&quot;, &quot;minister&quot;, &quot;amendment&quot;, &quot;parliament&quot;, &quot;eu&quot;, &quot;uk&quot;, &quot;government&quot;, &quot;european&quot;, &quot;union&quot;, &quot;united&quot;, &quot;kingdom&quot;)
+
+at_words &lt;- appearances_tib %&gt;%
+  anti_join(small_speeches) %&gt;%
+  unnest_tokens(word, speeches) %&gt;%
+  anti_join(stop_words) %&gt;%
+  filter(!word %in% my_stop_words, !str_detect(word, &quot;[0-9]&quot;)) %&gt;%
+  count(speech_id, word, sort = TRUE) %&gt;%
+  ungroup() 
+
+speeches_dtm &lt;- at_words %&gt;%
+  cast_dtm(speech_id, word, n)
+
+speeches_lda &lt;- LDA(speeches_dtm, k = 4, control = list(seed = 1234))
+
+speech_topics &lt;- tidy(speeches_lda, matrix = &quot;beta&quot;)
+
+top_terms &lt;- speech_topics %&gt;%
+  group_by(topic) %&gt;%
+  top_n(8, beta) %&gt;%
+  ungroup() %&gt;%
+  arrange(topic, -beta)
+
+top_terms %&gt;%
+  mutate(term = reorder(term, beta)) %&gt;%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = &quot;free&quot;) +
+  coord_flip() +
+  theme_classic()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-14"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-14-1.png" alt="The top words corresponding to each topic generated by LDA." width="864" />
+<p class="caption">
+Figure 5: The top words corresponding to each topic generated by LDA.
+</p>
+</div>
+<p>Above are our topics, and which 8 words are associated with each topic with the highest probability. I’d say we have a topics for “citizens/nationals”, “nuclear policy/euratom”, “womens/workers rights”, and “devolved administrations”.</p>
+<p>Let’s recode the topic numbers to these identifying words to make our lives easier:</p>
+<pre class="r"><code>topictib &lt;- tibble(topic=1:4, topic_name=c(&quot;citizens&quot;, &quot;euratom&quot;, &quot;rights&quot;, &quot;devolved&quot;))</code></pre>
+<div id="but-how-well-were-topics-assigned-to-each-document" class="section level4">
+<h4>But how <em>well</em> were topics assigned to each document?</h4>
+<p>For each document, every topic is given a “gamma” value. This represents the probability that this topic describes this document. So in our case, each speech has four gamma values associated with it, one for each topic. What does the distribution of these probabilities look like?</p>
+<div class="figure"><span id="fig:unnamed-chunk-16"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-16-1.png" alt="Distribution of probabilities assigning each topic to each speech." width="672" />
+<p class="caption">
+Figure 6: Distribution of probabilities assigning each topic to each speech.
+</p>
+</div>
+<p>What does this histogram mean? The vast majority of topic assignments had a probability close to 1, meaning that most documents could be classified solidly as one of our topics. But what about those that weren’t?</p>
+<pre class="r"><code>sketchy_speeches &lt;- speeches_gamma %&gt;% 
+  group_by(speech_id) %&gt;%
+  filter(gamma == max(gamma)) %&gt;%
+  filter(gamma &lt; 0.95) %&gt;%
+  ungroup() %&gt;%
+  mutate(speech_id = as.numeric(speech_id))
+
+speeches_gamma %&gt;%
+  filter(speech_id %in% sketchy_speeches$speech_id) %&gt;%
+  left_join(topictib, by = &quot;topic&quot;) %&gt;%
+  ggplot(aes(topic, gamma)) + geom_col(aes(fill = as.factor(topic_name))) + facet_wrap(~speech_id) +
+  theme_bw()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-17"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-17-1.png" alt="Speeches where no single topic was assigned with a high (&gt;0.95) probability." width="864" />
+<p class="caption">
+Figure 7: Speeches where no single topic was assigned with a high (&gt;0.95) probability.
+</p>
+</div>
+<p>Just from eyeballing this, we can see something pretty cool- none of our sketchy speeches seem to be shared the topics for “Euratom” and “rights”. How often were the other topics hard to classify and “confused” with other topics?</p>
+<p>I’ve counted up how often two topics are “difficult to assign” below:</p>
+<pre><code>## # A tibble: 5 x 3
+##   topic_a  topic_b      n
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;int&gt;
+## 1 citizens euratom      7
+## 2 citizens rights       6
+## 3 citizens devolved     5
+## 4 euratom  devolved     5
+## 5 rights   devolved     5</code></pre>
+<p>Our topic on devolved administrations is often confused with every other topic, and the same is true for the topic on citizens rights.</p>
+<pre class="r"><code># Make the above table long format
+confused_topics_l &lt;- tibble(topic = c(confused_topics$topic_a, confused_topics$topic_b), n= rep(confused_topics$n, 2))
+
+# and count each topic
+confused_topics_l %&gt;% 
+  group_by(topic) %&gt;%
+  summarise(total_n = sum(n)) %&gt;%
+  arrange(desc(total_n))</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   topic    total_n
+##   &lt;chr&gt;      &lt;int&gt;
+## 1 citizens      18
+## 2 devolved      15
+## 3 euratom       12
+## 4 rights        11</code></pre>
+<p>Taken in total, we commonly see speeches that are identified as being about both citizens rights and devolved administrations quite commonly. Both these topics seem to crossover with all the other topics, including one another. This could potentially mean the issues being discussed are related in some way. Or, if we remember that topics can share words (but the words have topic-specific probabilities assigned to them) it may simply be that the kind of language and words used to describe these topics is more general, so more of their defining words are “shared” and we see more overlapping topic assignments.</p>
+<p><br> <br></p>
+</div>
+<div id="which-topics-were-most-important-to-each-party" class="section level3">
+<h3>Which topics were most important to each party?</h3>
+<div class="figure"><span id="fig:unnamed-chunk-20"></span>
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-20-1.png" alt="The proportion of speeches assigned to each topic from each of the big four political groups/parties in the House of Lords." width="768" />
+<p class="caption">
+Figure 8: The proportion of speeches assigned to each topic from each of the big four political groups/parties in the House of Lords.
+</p>
+</div>
+<p>Considered as a proportion of all of their speeches, the Conservatives and Liberal Democrats noticably speak more on the topic of citizens rights and British nationals, whereas Labour Lords speak more on the topic of Euratom than other topics. Topic 3, in which the top three words are “Women”, “rights” and “workers”, is touched on least in all four groups.</p>
+<p><br></p>
+</div>
+<div id="the-topic-timeline" class="section level3">
+<h3>The “Topic Timeline”</h3>
+<p>How do the topics of discussion change over the course of the Hansard? We’ve already looked at this superficially with top-scoring TF-IDF words in the previous blog post, but now we can try with our topic model. Remember, each speech is associated with four probabilities (adding to 1), one for each topic. This means we can plot how these probabilities change within speeches over the course of the debate. I have plotted smoothed curves which try and provide the “best fit” for the data, to give an easier interpretation of what’s going on.</p>
+<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-21-1.png" width="1152" /> <img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-22-1.png" width="1152" /></p>
+<p>The subplot was previously a stacked column chart, which I used to show exactly how the proportion of topics in each speech changes <strong>discretely</strong> over time. But because they were so thin the columns were hard to interpret. Geom_area gives this funky piece of abstract art, which speaks to me as a biology student because it reminds me of the selective sweeps of evolving E. coli in <a href="https://www.youtube.com/watch?v=plVk4NVIUh8">this experiment</a> by microbiologists at Harvard, so I decided to keep it (I know, it’s a terrible reason to keep a plot, but this is <em>my</em> blog). The point is that although the smoothed curves show these nice transitions between topics, the reality is a jerky mess of topic changes that does however follow a general trend.</p>
+<p><br></p>
+</div>
+</div>
+<div id="dipping-into-linguistics-and-part-of-speech-tagging" class="section level2">
+<h2>Dipping into linguistics and Part-of-speech tagging</h2>
+<p>As the final thing I’d like to look at in this post, we’ll try using some linguistic tools to dig into <em>how</em> people talk in the Hansard, not just <em>what</em> they talk about or <em>how much</em>. I remembered reading a while ago about measuring the use of words related to yourself “I, me, my” (possessive pronouns?). I added another dimension to this idea and also measure use of “We, our, us” (collective pronouns?): <code>me_words &lt;- c(&quot;My&quot;, &quot;my&quot;, &quot;Me&quot;, &quot;me&quot;, &quot;I&quot;, &quot;i&quot;)</code></p>
+<p><code>us_words &lt;- c(&quot;We&quot;, &quot;we&quot;, &quot;our&quot;, &quot;Our&quot;, &quot;us&quot;, &quot;Us&quot;)</code></p>
+<p>The plot below looks like some we’ve plotted before, but be careful- the X-axis <strong>isn’t time</strong> this time. The X-axis is what we call a log ratio of the counts of each of our group of words. To get this I divided the number of “us words” by the number of “me words”:</p>
+<p><code>us_me_ratio=n_us_words/n_me_words</code> then took the log of this value <code>log2(us_me_ratio)</code>. Taking the logarithm scales the values so that a value of zero indicates no difference in the number of us versus me words, and every change by 1 indicates that the usage of us vs me words has doubled or halved (I used a log of 2).</p>
+<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-23-1.png" width="1152" /></p>
+<p>I haven’t delved into this too much, but all I can say is hats off to Baroness Stowell of Beeston. She is the most inclusive Lord out there by a long shot, and if you read <a href="http://bit.ly/2SaKh4Z" target="_blank">her speech</a> you’ll see that she really cares about our <em>collective responsibility</em> for withdrawing from the EU.</p>
+<div id="part-of-speech-tagging" class="section level3">
+<h3>Part-of-speech tagging</h3>
+<p><strong>Part of speech tagging</strong> is just a fancy way of saying we’re going to label every word in a text as an “adjective” or a “noun” or a “verb” etc… Some people who are much smarter than I am have spent a good while <a href="https://opennlp.apache.org/" target="_blank">training machines</a> to do this and were kind enough to make it all open source. I’m not an expert, but from what I understand the OpenNLP tools are pretty good at accurately identifying the POS of each word, so that’s what we’re going to use.</p>
+<pre class="r"><code>pacman::p_load(NLP, openNLP, openNLPmodels.en)
+
+# Function to annotate a specific text
+
+sent_token_annotator &lt;- Maxent_Sent_Token_Annotator()
+word_token_annotator &lt;- Maxent_Word_Token_Annotator()
+pos_tag_annotator &lt;- Maxent_POS_Tag_Annotator()
+pos_tag_abbrs &lt;- readRDS(&quot;../eu_hansard/data/pos_tag_abbrs.RDAT&quot;)
+
+anno &lt;- function(text, pattern = &quot;NN&quot;) {
+  # Note: pattern = .* will return tags for all words in text
+  
+  # Tokenizes the text into sentences and words
+  text &lt;- as.String(text)
+  a2 &lt;- annotate(text, list(sent_token_annotator, word_token_annotator))
+  
+  a3 &lt;- annotate(text, pos_tag_annotator, a2)
+  
+  # Take the words from the text, pull the POS features
+  a3w &lt;- subset(a3, type == &quot;word&quot;)
+  tags &lt;- sapply(a3w$features, `[[`, &quot;POS&quot;)
+  
+  #tags_f &lt;- tags[str_detect(text[a3w], &quot;[A-Za-z]&quot;)]
+  
+  # Make a tibble of the words and tags, filter for the desired part-of-speech (pattern)
+  text_tib &lt;- tibble(word = text[a3w], tags)
+  text_tib %&gt;%
+    filter(str_detect(tags, pattern)) %&gt;% left_join(pos_tag_abbrs, by = c(&quot;tags&quot; = &quot;abbreviation&quot;))
+} </code></pre>
+<p>I’ve shown this bit of code to illustrate that beauty is in the eye of the beholder. The <code>anno()</code> function is something I wrote, which was heftily borrowed from the <a href="https://www.rdocumentation.org/packages/openNLP/versions/0.2-6/topics/Maxent_POS_Tag_Annotator" target="_blank">openNLP documentation</a> (in R). It takes some text and returns a data table with each word and the associated ‘POS tag’ (e.g. “go” and “verb”).</p>
+<p>There’s quite a bit of cool stuff you can do with this data, and one thing people are fond of is counting the number of nouns, adjectives etc… and seeing what the most common ones are. We’re going to skip all of that and ask a different question. <strong>Can we identify different groups of speakers based on the proportion of adjectives, nouns, and verbs they use?</strong> That’s right, rather than pay attention to <em>which</em> words are being used, we’re going to just count them (again).</p>
+<pre class="r"><code>prep_speeches &lt;- appearances_tib %&gt;% #annotated_speeches
+  anti_join(small_speeches, by=&quot;speech_id&quot;) %&gt;%
+  mutate(speeches = map(speeches, ~anno(., &quot;.+&quot;)))</code></pre>
+<p>First off we remove small speeches and annotate the words in each using the function speech.</p>
+<pre class="r"><code>ling_profiles &lt;- prep_speeches %&gt;%
+  unnest() %&gt;%
+  group_by(name) %&gt;%
+  summarise(n_words = n(), # Total number of words used
+         n_verbs = sum(str_detect(tags, &quot;^V.+&quot;)), # Count all the tags which correspond to verbs
+         n_adjs = sum(str_detect(tags, &quot;^J.+&quot;)), # To adjectives
+         n_nouns = sum(str_detect(tags, &quot;^N.+&quot;)), # To Nouns
+         p_verbs = n_verbs/n_words, # Divide number of verbs by total number of words
+         p_adjs = n_adjs/n_words,
+         p_nouns = n_nouns/n_words)</code></pre>
+<p>Then we make what I’ve called the “linguistic profile” of each speaker, by counting up the POS tags from all the words they use, and calculating those values as a proportion of the total number of words they use.</p>
+<pre class="r"><code>distmat &lt;- ling_profiles %&gt;%
+  select(p_verbs, p_adjs, p_nouns) %&gt;%
+  dist()
+
+attr(distmat, &quot;Labels&quot;) &lt;- ling_profiles$name # add peers names as labels to matrix
+
+clust &lt;- distmat %&gt;%
+  hclust()</code></pre>
+<p>Now for the nasty part. We take the data for the proportions of each tag, and we calculate the <em>Euclidian distance</em> between each speakers profile. What on earth does that mean?</p>
+<p>We have collcted three pieces of data for each speaker: the proportion of verbs, adjectives and nouns. This data can be arranged in 3-dimensional space like so (the x, y and z axis are the proportion of each.</p>
+<div class="figure">
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian1_5.png" />
+
+</div>
+<p>Then, the Euclidian distance is a simple way of saying “calculate the distance between each of these points”. (Nb. In some cases, it is necessary to “normalise” your variables before calculating the Euclidian distance. If for example one variable is measured on a higher order of magnitude, you could end up with that one variable contributing to all the difference in distance, which makes other variables irrelevant.)</p>
+<div class="figure">
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian2.png" />
+
+</div>
+<p>So we end up with a big table where we record the distance of each point from every other point. Here’s a little snippet of it:</p>
+<pre><code>##        1     2     3     4     5     6     7     8     9    10
+## 1  0.000 0.044 0.011 0.074 0.053 0.025 0.024 0.056 0.023 0.039
+## 2  0.044 0.000 0.051 0.102 0.028 0.037 0.060 0.017 0.041 0.025
+## 3  0.011 0.051 0.000 0.079 0.057 0.034 0.029 0.063 0.033 0.049
+## 4  0.074 0.102 0.079 0.000 0.115 0.068 0.053 0.106 0.062 0.080
+## 5  0.053 0.028 0.057 0.115 0.000 0.056 0.074 0.042 0.055 0.043
+## 6  0.025 0.037 0.034 0.068 0.056 0.000 0.026 0.042 0.012 0.022
+## 7  0.024 0.060 0.029 0.053 0.074 0.026 0.000 0.067 0.024 0.046
+## 8  0.056 0.017 0.063 0.106 0.042 0.042 0.067 0.000 0.048 0.029
+## 9  0.023 0.041 0.033 0.062 0.055 0.012 0.024 0.048 0.000 0.023
+## 10 0.039 0.025 0.049 0.080 0.043 0.022 0.046 0.029 0.023 0.000</code></pre>
+<p>This is what the “distance matrix” would look like for ten speakers. Speaker 1 is more similar to Speaker 3 than Speaker 2 (the distance between 1 and 3 is less).</p>
+<p>Then we use a <a href="https://www.youtube.com/watch?v=XJ3194AmH40" target="_blank">heirarchical clustering algorithm</a> to try and find out how the points are organised into groups (or clusters) based on the distances between each point. There’s a bit more to it than this, but a heirarchical clustering algorithm (e.g. <code>hclust()</code> in R) looks through the distance matrix for the smallest number- indicating the two points that are closest together in 3D space in our image like so:</p>
+<div class="figure">
+<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian3.png" />
+
+</div>
+<p>That might be these two points in our toy example. The algorithm then puts these two points into the same cluster, and repeats this process until all the points are sorted into one big cluster. You could imagine this making something like a tree, where pairs of points are added to clusters until you reach the root, where all the points are in one cluster:</p>
+<pre class="r"><code>plot(clust)</code></pre>
+<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-29-1.png" width="1152" /></p>
+<p>Our job is now to decide what an <em>appropriate number of clusters</em> is. If that sounds arbitrary and vague that’s because it is. Knowing what the “right” number of clusters is depends on the context. We can look at the tree made by the algorithm above, and see that two clusters of Lords are joined together quite far up the tree- implying that these two clusters are far apart in the 3D graph. These two clusters then each split into another pair, after which the distance between clusters is much smaller in successive joins. So we’ll tell the algorithm to return 4 clusters.</p>
+<pre class="r"><code>members &lt;- cutree(clust, k = 4) # Cut our tree into four separate clusters.
+members &lt;- tibble(name=names(members), cluster=members) # Make a data frame from the results.</code></pre>
+<p>You can imagine that each peer has now been assigned to one of four clusters based on their linguistic profile.</p>
+<p>One thing you can do to get an idea of what is driving the differences between your clusters is to plot the <a href="https://datavizcatalogue.com/methods/parallel_coordinates.html" target="_blank">parallel coordinates</a> of each of your variables:</p>
+<pre class="r"><code>parcoord &lt;- ling_profiles %&gt;%
+  select(name, p_verbs, p_adjs, p_nouns) %&gt;%
+  left_join(members) %&gt;%
+  select(-name) %&gt;%
+  mutate(ID = as.character(1:n()), cluster=as.factor(cluster)) %&gt;%             # Add ID for each row
+  mutate_if(is.numeric, scale) %&gt;%   # Scale numeric columns
+  gather(key, value, c(1:3))    # Reshape to &quot;long&quot; format
+
+ggplot(parcoord,     # Reshape to &quot;long&quot; format
+       aes(key, value, group=ID, colour=cluster)) +
+  geom_line() +
+  geom_point(size=2, shape=21, colour=&quot;grey50&quot;) +
+  scale_fill_manual(values=c(&quot;black&quot;,&quot;white&quot;)) + 
+  ggpubr::theme_pubr()</code></pre>
+<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-31-1.png" width="864" /></p>
+<p>I find a more helpful way is simply to plot the distribution of values for each thing we based our clustering on (proportion of verbs, adjectives and nouns used) for the peers within each cluster.</p>
+<pre class="r"><code>group_characteristics &lt;- ling_profiles %&gt;%
+  left_join(members) %&gt;%
+  group_by(cluster) %&gt;%
+  summarise(verb_median = median(p_verbs), adj_median = median(p_adjs), noun_median = median(p_nouns), sd_verb=sd(p_verbs), sd_adj=sd(p_adjs), sd_noun=sd(p_nouns)) 
+
+group_characteristics %&lt;&gt;% mutate_if(is.numeric, ~round(., 3))
+
+ling_profiles %&gt;%
+  select(name, p_adjs, p_verbs, p_nouns) %&gt;%
+  gather(feature, value, c(&quot;p_adjs&quot;,&quot;p_verbs&quot;, &quot;p_nouns&quot;)) %&gt;%
+  left_join(members, by= &quot;name&quot;) %&gt;%
+  ggplot(aes(feature, value)) + 
+  geom_boxplot(aes(group=feature, colour=feature),show.legend = F) + 
+  geom_point(aes(colour=feature), alpha=0.5) +
+  facet_wrap(~cluster, ncol = 4) +
+  theme_bw()</code></pre>
+<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-32-1.png" width="864" /></p>
+<pre class="r"><code>DT::datatable(group_characteristics)</code></pre>
+<div id="htmlwidget-5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"filter":"none","data":[["1","2","3","4"],[1,2,3,4],[0.148,0.167,0.13,0.198],[0.07,0.062,0.075,0.047],[0.235,0.207,0.265,0.174],[0.014,0.011,0.021,0.019],[0.016,0.01,0.01,0.011],[0.012,0.012,0.021,0.011]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster<\/th>\n      <th>verb_median<\/th>\n      <th>adj_median<\/th>\n      <th>noun_median<\/th>\n      <th>sd_verb<\/th>\n      <th>sd_adj<\/th>\n      <th>sd_noun<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>Now this is cool. The first two groups of peers use pretty similar proportions of each grammatical feature, but one group uses marginally less nouns and marginally more verbs. The next two clusters, each containing 6 and 5 peers respectively, have markedly different distributions. <em>Cluster 3</em> use a much <strong>higher proportion of nouns than verbs</strong>. They use on average <em>66%-88%</em> of the <strong>verbs</strong> other clusters do, while using <em>26-53%</em> <strong>more nouns</strong>. <em>Cluster 4</em> is even weirder, these peers generally use more verbs than nouns but also on average were using only <em>63%-76%</em> as many <strong>adjectives</strong> as other groups of peers.</p>
+<pre><code>##           1         2         3        4
+## 1 1.0000000 1.1290323 0.9333333 1.489362
+## 2 0.8857143 1.0000000 0.8266667 1.319149
+## 3 1.0714286 1.2096774 1.0000000 1.595745
+## 4 0.6714286 0.7580645 0.6266667 1.000000</code></pre>
+<p>We can use matrices to calculate the average differences between all the clusters, this one is the difference in proportion of adjectives (notice the row for cluster 4).</p>
+<div id="htmlwidget-6" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68"],["Baroness Bowles of Berkhamsted","Baroness Burt of Solihull","Baroness Crawley","Baroness Drake","Baroness Hamwee","Baroness Hayter of Kentish Town","Baroness Jones of Moulsecoomb","Baroness Kennedy of The Shaws","Baroness Lister of Burtersett","Baroness Ludford","Baroness Northover","Baroness Randerson","Baroness Smith of Basildon","Baroness Smith of Newnham","Baroness Stowell of Beeston","Baroness Symons of Vernham Dean","Lord Balfe","Lord Berkeley","Lord Bilimoria","Lord Blencathra","Lord Bowness","Lord Bragg","Lord Bridges of Headley","Lord Bruce of Bennachie","Lord Campbell of Pittenweem","Lord Clark of Windermere","Lord Deben","Lord Elystan-Morgan","Lord Empey","Lord Fox","Lord Green of Deddington","Lord Hannay of Chiswick","Lord Hayward","Lord Higgins","Lord Hope of Craighead","Lord Howard of Lympne","Lord Howell of Guildford","Lord Hunt of Chesterton","Lord Hutton of Furness","Lord Keen of Elie","Lord Kerslake","Lord Kirkhope of Harrogate","Lord Krebs","Lord Lawson of Blaby","Lord Lea of Crondall","Lord Liddle","Lord Lisvane","Lord Mackay of Clashfern","Lord O'Neill of Clackmannan","Lord Oates","Lord Oxburgh","Lord Pannick","Lord Redesdale","Lord Rees of Ludlow","Lord Stern of Brentford","Lord Tebbit","Lord Teverson","Lord Trevethin and Oaksey","Lord True","Lord Tyler","Lord Wallace of Tankerness","Lord Warner","Lord Wigley","The Archbishop of York","The Earl of Kinnoull","The Earl of Selborne","Viscount Hailsham","Viscount Waverley"],[1,2,1,3,2,1,3,2,1,1,3,1,2,1,4,2,2,2,3,2,2,2,2,1,2,2,4,2,2,2,2,2,1,4,4,1,2,1,2,1,2,2,1,1,2,1,2,2,2,1,1,1,2,1,1,2,2,1,1,2,3,3,1,4,2,2,2,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>cluster<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>You can peruse this table showing which Lords were allocated to which cluster at your own leisure, but will point you to two examples:</p>
+<p>Lord Bilimoria of Cluster 3: <a href="http://bit.ly/2DygMzV" target="_blank">speech</a> Lord Deben of Cluster 4: <a href="http://bit.ly/2E5WXBH" target="_blank">speech</a></p>
+<p>Although it’s not amazingly clear, you might notice how Bilimoria references many organisations during his speech, leading to the inflated number of nouns and presumably also contributing to the lower proportion of verbs. Lord Deben on the other hand likes his doing words, and I think the inflated proportion of verbs is noticeable in the way he speaks so demandingly, but I might be suffering from bias.</p>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>In this article, I applied tidy text mining and linguistic methods such as tokenisation into bigrams, sentiment analysis, topic modelling, and part-of-speech tagging to try and gain more insight into a Hansard debate. There are many things I’ve not included, notably supervised machine learning for <a href="https://juliasilge.com/blog/tidy-text-classification/">text classification</a> and attemps to measure <a href="https://www.markhw.com/blog/word-similarity-graphs">text similarity</a> or extractive <a href="https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume22/erkan04a-html/erkan04a.html">text summarisation</a>. But this article is already too long. Thanks for reading!</p>
+<p><br></p>
+<div id="further-thoughts-if-youre-interested" class="section level3">
+<h3>Further thoughts (if you’re interested)</h3>
+<p>There’s something to be said here for the general role of exploratory data analysis in political and social discourse and decision making. Sometimes, analyses can give the impression that a researcher didn’t think to themselves “just because we can, doesn’t mean that we should”. Every tool is only as useful as the practitioner is skillful. A more abstract method used in the wrong situation only obscures. Obviously here, I have been trying to showcase how different tools might be used in the context of exploring a parliamentary debate. We have looked at it through the lens of a data analysis problem without being <em>too</em> concerned about the results. But I hope I have also communicated to some extent the challenges inherent in this process- particularly at the ends of meaningful implementation and interpretation.</p>
+<p>Such tools should one day form a core part of a political transparency and accountability- but they are only as powerful as our ability to communicate the findings transparently ourselves. The <a href="https://commonslibrary.parliament.uk/about-us/">House of Commons library</a> publishes research by independent experts who also provide impartial briefings to MPs on issues. This is really great. Earlier in the article I also linked to the House of Lords <a href="https://researchbriefings.parliament.uk/">Research Briefings</a>. But this is only one part of transparency I’d like to see in a democracy. There is no substitute for giving people the power to dig into the data themselves. You cannot get closer to the reality of parliamentary opinion than the <a href="https://hansard.parliament.uk/">Hansards</a> themselves. Often in such curated analysis the end product is nice but the analytical process is obscured. I recently read this really interesting <a href="https://yougov.co.uk/topics/politics/articles-reports/2019/01/29/16-groups-brexit">YouGov piece</a>, but I found it hard to understand how they got their results. Let people see the guts and grime, and make the data available in an accessible format so the analysis can be reproduced. Open source tools like those built in R are beginning to change how people interact with politics, but there is still room for improvement at all levels: data providers (the govt.), data analysts and communicators (researchers and journalists) and consumers (the general public).</p>
+<p>Here is a link to the <a href="https://github.com/mogs-git/eu_hansard">github page</a> for this project if you’d like to look at the code. Please send feedback to mchaib[dot]blog[at]gmail[dot]com.</p>
+</div>
+</div>
+</div>
