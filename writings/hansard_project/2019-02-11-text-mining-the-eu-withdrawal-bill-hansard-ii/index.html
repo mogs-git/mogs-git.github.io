@@ -1,14 +1,14 @@
-<script src="./rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
-<script src="./rmarkdown-libs/jquery/jquery.min.js"></script>
-<link href="./rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/datatables-binding/datatables.js"></script>
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
-<link href="./rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="fonts.css">
+<script src="../rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="../rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="../rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="../rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../fonts.css">
 
 <div id="hansard-text-analysis-part-3" class="section level1">
 <h1>Hansard Text Analysis (Part 3)</h1>
@@ -89,7 +89,7 @@ ggraph(bigram_graph, layout = &quot;fr&quot;) +
   scale_edge_alpha(range = c(0.5,1)) +
   theme_void()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-5"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-5-1.png" alt="To get this network, I dropped every pair of words that appeared less than five times in the whole Hansard. Remaining words are placed on the graph and lines connected between the ones that occur together in pairs. The strength of the line tells us how often the pair of words were used. An algorithm sorts out the points so that connected nets of words are plotted close to one another and not overlapping with other nets (Thanks [igraph](https://igraph.org/r/) and [ggraph](https://github.com/thomasp85/ggraph)!)." width="960" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-5-1.png" alt="To get this network, I dropped every pair of words that appeared less than five times in the whole Hansard. Remaining words are placed on the graph and lines connected between the ones that occur together in pairs. The strength of the line tells us how often the pair of words were used. An algorithm sorts out the points so that connected nets of words are plotted close to one another and not overlapping with other nets (Thanks [igraph](https://igraph.org/r/) and [ggraph](https://github.com/thomasp85/ggraph)!)." width="960" />
 <p class="caption">
 Figure 1: To get this network, I dropped every pair of words that appeared less than five times in the whole Hansard. Remaining words are placed on the graph and lines connected between the ones that occur together in pairs. The strength of the line tells us how often the pair of words were used. An algorithm sorts out the points so that connected nets of words are plotted close to one another and not overlapping with other nets (Thanks <a href="https://igraph.org/r/">igraph</a> and <a href="https://github.com/thomasp85/ggraph">ggraph</a>!).
 </p>
@@ -140,7 +140,7 @@ implicit_mentions %&gt;%
   geom_point() +
   theme_classic()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-9"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-9-1.png" alt="Amendment explicit vs implicit mentions." width="672" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-9-1.png" alt="Amendment explicit vs implicit mentions." width="672" />
 <p class="caption">
 Figure 2: Amendment explicit vs implicit mentions.
 </p>
@@ -159,7 +159,7 @@ Figure 2: Amendment explicit vs implicit mentions.
   scale_fill_brewer(type = &quot;qual&quot;, palette = 2) +
   theme_classic()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-10"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-10-1.png" alt="Cross-party proportion of mentions of for each amendment." width="768" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-10-1.png" alt="Cross-party proportion of mentions of for each amendment." width="768" />
 <p class="caption">
 Figure 3: Cross-party proportion of mentions of for each amendment.
 </p>
@@ -209,7 +209,7 @@ amendment_position %&gt;%
   facet_wrap(~amendment) +
   theme_classic()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-11"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-11-1.png" alt="Measuring support versus opposition for each amendment based on sentences containing the word 'amendment'" width="672" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-11-1.png" alt="Measuring support versus opposition for each amendment based on sentences containing the word 'amendment'" width="672" />
 <p class="caption">
 Figure 4: Measuring support versus opposition for each amendment based on sentences containing the word ‘amendment’
 </p>
@@ -272,7 +272,7 @@ top_terms %&gt;%
   coord_flip() +
   theme_classic()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-14"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-14-1.png" alt="The top words corresponding to each topic generated by LDA." width="864" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-14-1.png" alt="The top words corresponding to each topic generated by LDA." width="864" />
 <p class="caption">
 Figure 5: The top words corresponding to each topic generated by LDA.
 </p>
@@ -284,7 +284,7 @@ Figure 5: The top words corresponding to each topic generated by LDA.
 <h4>But how <em>well</em> were topics assigned to each document?</h4>
 <p>For each document, every topic is given a “gamma” value. This represents the probability that this topic describes this document. So in our case, each speech has four gamma values associated with it, one for each topic. What does the distribution of these probabilities look like?</p>
 <div class="figure"><span id="fig:unnamed-chunk-16"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-16-1.png" alt="Distribution of probabilities assigning each topic to each speech." width="672" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-16-1.png" alt="Distribution of probabilities assigning each topic to each speech." width="672" />
 <p class="caption">
 Figure 6: Distribution of probabilities assigning each topic to each speech.
 </p>
@@ -303,7 +303,7 @@ speeches_gamma %&gt;%
   ggplot(aes(topic, gamma)) + geom_col(aes(fill = as.factor(topic_name))) + facet_wrap(~speech_id) +
   theme_bw()</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-17"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-17-1.png" alt="Speeches where no single topic was assigned with a high (&gt;0.95) probability." width="864" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-17-1.png" alt="Speeches where no single topic was assigned with a high (&gt;0.95) probability." width="864" />
 <p class="caption">
 Figure 7: Speeches where no single topic was assigned with a high (&gt;0.95) probability.
 </p>
@@ -340,7 +340,7 @@ confused_topics_l %&gt;%
 <div id="which-topics-were-most-important-to-each-party" class="section level3">
 <h3>Which topics were most important to each party?</h3>
 <div class="figure"><span id="fig:unnamed-chunk-20"></span>
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-20-1.png" alt="The proportion of speeches assigned to each topic from each of the big four political groups/parties in the House of Lords." width="768" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-20-1.png" alt="The proportion of speeches assigned to each topic from each of the big four political groups/parties in the House of Lords." width="768" />
 <p class="caption">
 Figure 8: The proportion of speeches assigned to each topic from each of the big four political groups/parties in the House of Lords.
 </p>
@@ -351,7 +351,7 @@ Figure 8: The proportion of speeches assigned to each topic from each of the big
 <div id="the-topic-timeline" class="section level3">
 <h3>The “Topic Timeline”</h3>
 <p>How do the topics of discussion change over the course of the Hansard? We’ve already looked at this superficially with top-scoring TF-IDF words in the previous blog post, but now we can try with our topic model. Remember, each speech is associated with four probabilities (adding to 1), one for each topic. This means we can plot how these probabilities change within speeches over the course of the debate. I have plotted smoothed curves which try and provide the “best fit” for the data, to give an easier interpretation of what’s going on.</p>
-<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-21-1.png" width="1152" /> <img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-22-1.png" width="1152" /></p>
+<p><img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-21-1.png" width="1152" /> <img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-22-1.png" width="1152" /></p>
 <p>The subplot was previously a stacked column chart, which I used to show exactly how the proportion of topics in each speech changes <strong>discretely</strong> over time. But because they were so thin the columns were hard to interpret. Geom_area gives this funky piece of abstract art, which speaks to me as a biology student because it reminds me of the selective sweeps of evolving E. coli in <a href="https://www.youtube.com/watch?v=plVk4NVIUh8">this experiment</a> by microbiologists at Harvard, so I decided to keep it (I know, it’s a terrible reason to keep a plot, but this is <em>my</em> blog). The point is that although the smoothed curves show these nice transitions between topics, the reality is a jerky mess of topic changes that does however follow a general trend.</p>
 <p><br></p>
 </div>
@@ -362,7 +362,7 @@ Figure 8: The proportion of speeches assigned to each topic from each of the big
 <p><code>us_words &lt;- c(&quot;We&quot;, &quot;we&quot;, &quot;our&quot;, &quot;Our&quot;, &quot;us&quot;, &quot;Us&quot;)</code></p>
 <p>The plot below looks like some we’ve plotted before, but be careful- the X-axis <strong>isn’t time</strong> this time. The X-axis is what we call a log ratio of the counts of each of our group of words. To get this I divided the number of “us words” by the number of “me words”:</p>
 <p><code>us_me_ratio=n_us_words/n_me_words</code> then took the log of this value <code>log2(us_me_ratio)</code>. Taking the logarithm scales the values so that a value of zero indicates no difference in the number of us versus me words, and every change by 1 indicates that the usage of us vs me words has doubled or halved (I used a log of 2).</p>
-<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-23-1.png" width="1152" /></p>
+<p><img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-23-1.png" width="1152" /></p>
 <p>I haven’t delved into this too much, but all I can say is hats off to Baroness Stowell of Beeston. She is the most inclusive Lord out there by a long shot, and if you read <a href="http://bit.ly/2SaKh4Z" target="_blank">her speech</a> you’ll see that she really cares about our <em>collective responsibility</em> for withdrawing from the EU.</p>
 <div id="part-of-speech-tagging" class="section level3">
 <h3>Part-of-speech tagging</h3>
@@ -424,12 +424,12 @@ clust &lt;- distmat %&gt;%
 <p>Now for the nasty part. We take the data for the proportions of each tag, and we calculate the <em>Euclidian distance</em> between each speakers profile. What on earth does that mean?</p>
 <p>We have collcted three pieces of data for each speaker: the proportion of verbs, adjectives and nouns. This data can be arranged in 3-dimensional space like so (the x, y and z axis are the proportion of each.</p>
 <div class="figure">
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian1_5.png" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian1_5.png" />
 
 </div>
 <p>Then, the Euclidian distance is a simple way of saying “calculate the distance between each of these points”. (Nb. In some cases, it is necessary to “normalise” your variables before calculating the Euclidian distance. If for example one variable is measured on a higher order of magnitude, you could end up with that one variable contributing to all the difference in distance, which makes other variables irrelevant.)</p>
 <div class="figure">
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian2.png" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian2.png" />
 
 </div>
 <p>So we end up with a big table where we record the distance of each point from every other point. Here’s a little snippet of it:</p>
@@ -447,12 +447,12 @@ clust &lt;- distmat %&gt;%
 <p>This is what the “distance matrix” would look like for ten speakers. Speaker 1 is more similar to Speaker 3 than Speaker 2 (the distance between 1 and 3 is less).</p>
 <p>Then we use a <a href="https://www.youtube.com/watch?v=XJ3194AmH40" target="_blank">heirarchical clustering algorithm</a> to try and find out how the points are organised into groups (or clusters) based on the distances between each point. There’s a bit more to it than this, but a heirarchical clustering algorithm (e.g. <code>hclust()</code> in R) looks through the distance matrix for the smallest number- indicating the two points that are closest together in 3D space in our image like so:</p>
 <div class="figure">
-<img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian3.png" />
+<img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/euclidian3.png" />
 
 </div>
 <p>That might be these two points in our toy example. The algorithm then puts these two points into the same cluster, and repeats this process until all the points are sorted into one big cluster. You could imagine this making something like a tree, where pairs of points are added to clusters until you reach the root, where all the points are in one cluster:</p>
 <pre class="r"><code>plot(clust)</code></pre>
-<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-29-1.png" width="1152" /></p>
+<p><img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-29-1.png" width="1152" /></p>
 <p>Our job is now to decide what an <em>appropriate number of clusters</em> is. If that sounds arbitrary and vague that’s because it is. Knowing what the “right” number of clusters is depends on the context. We can look at the tree made by the algorithm above, and see that two clusters of Lords are joined together quite far up the tree- implying that these two clusters are far apart in the 3D graph. These two clusters then each split into another pair, after which the distance between clusters is much smaller in successive joins. So we’ll tell the algorithm to return 4 clusters.</p>
 <pre class="r"><code>members &lt;- cutree(clust, k = 4) # Cut our tree into four separate clusters.
 members &lt;- tibble(name=names(members), cluster=members) # Make a data frame from the results.</code></pre>
@@ -472,7 +472,7 @@ ggplot(parcoord,     # Reshape to &quot;long&quot; format
   geom_point(size=2, shape=21, colour=&quot;grey50&quot;) +
   scale_fill_manual(values=c(&quot;black&quot;,&quot;white&quot;)) + 
   ggpubr::theme_pubr()</code></pre>
-<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-31-1.png" width="864" /></p>
+<p><img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-31-1.png" width="864" /></p>
 <p>I find a more helpful way is simply to plot the distribution of values for each thing we based our clustering on (proportion of verbs, adjectives and nouns used) for the peers within each cluster.</p>
 <pre class="r"><code>group_characteristics &lt;- ling_profiles %&gt;%
   left_join(members) %&gt;%
@@ -490,7 +490,7 @@ ling_profiles %&gt;%
   geom_point(aes(colour=feature), alpha=0.5) +
   facet_wrap(~cluster, ncol = 4) +
   theme_bw()</code></pre>
-<p><img src="post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-32-1.png" width="864" /></p>
+<p><img src="../post/2019-02-11-text-mining-the-eu-withdrawal-bill-hansard-ii_files/figure-html/unnamed-chunk-32-1.png" width="864" /></p>
 <pre class="r"><code>DT::datatable(group_characteristics)</code></pre>
 <div id="htmlwidget-5" style="width:100%;height:auto;" class="datatables html-widget"></div>
 <script type="application/json" data-for="htmlwidget-5">{"x":{"filter":"none","data":[["1","2","3","4"],[1,2,3,4],[0.148,0.167,0.13,0.198],[0.07,0.062,0.075,0.047],[0.235,0.207,0.265,0.174],[0.014,0.011,0.021,0.019],[0.016,0.01,0.01,0.011],[0.012,0.012,0.021,0.011]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster<\/th>\n      <th>verb_median<\/th>\n      <th>adj_median<\/th>\n      <th>noun_median<\/th>\n      <th>sd_verb<\/th>\n      <th>sd_adj<\/th>\n      <th>sd_noun<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>

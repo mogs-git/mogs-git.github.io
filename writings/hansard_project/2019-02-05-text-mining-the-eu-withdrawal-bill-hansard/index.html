@@ -1,14 +1,14 @@
-<script src="./rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
-<script src="./rmarkdown-libs/jquery/jquery.min.js"></script>
-<link href="./rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/datatables-binding/datatables.js"></script>
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
-<link href="./rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="fonts.css">
+<script src="../rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="../rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="../rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="../rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../fonts.css">
 
 <div id="hansard-text-analysis-part-2" class="section level1">
 <h1>Hansard Text Analysis (Part 2)</h1>
@@ -27,7 +27,7 @@
 <h4>Speech lengths</h4>
 <p>We’ll start with the simplest detail relating to the words in our Hansard- how many are used in total each speech.</p>
 <div class="figure"><span id="fig:unnamed-chunk-2"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-2-1.png" alt="Distribution of speech lengths with vertical bars for lower quartile, median and upper quartile." width="672" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-2-1.png" alt="Distribution of speech lengths with vertical bars for lower quartile, median and upper quartile." width="672" />
 <p class="caption">
 Figure 1: Distribution of speech lengths with vertical bars for lower quartile, median and upper quartile.
 </p>
@@ -36,7 +36,7 @@ Figure 1: Distribution of speech lengths with vertical bars for lower quartile, 
 <p>For comparison, take a look at Baroness Smith’s 135 word speech <a href="http://bit.ly/2SaRP80" target="_blank">here</a> and Baroness Stowell’s 420 word speech <a href="http://bit.ly/2SaKh4Z" target="_blank">here</a> for comparison.. Using my internal “speech length” indicator, these results are telling me that 75% of speeches are not really very long at all. Indeed, a 400 word speech only takes 1.5 to 2 minutes to read aloud.</p>
 <p>We also know that different MPs used different numbers of speeches. We would expect to see that the more speeches you make, the more words you use. Is this the case?</p>
 <div class="figure"><span id="fig:unnamed-chunk-4"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-4-1.png" alt="The relationship between the number of speeches a lord gives and the number of words they use." width="960" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-4-1.png" alt="The relationship between the number of speeches a lord gives and the number of words they use." width="960" />
 <p class="caption">
 Figure 2: The relationship between the number of speeches a lord gives and the number of words they use.
 </p>
@@ -44,7 +44,7 @@ Figure 2: The relationship between the number of speeches a lord gives and the n
 <p>As we might expect, the more speeches you give, the more words you use in total. But this correlation is far from perfect and there is a glaring outlier in the two Lords who made 12 speeches both using hardly any words.</p>
 <p>Let’s pick out the peers who made five or more speeches, and look not just at the total number of words, but the number of words used in each of their speeches (to understand the spread).</p>
 <div class="figure"><span id="fig:unnamed-chunk-5"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-5-1.png" alt="As above but with specific boxplots for each peer." width="960" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-5-1.png" alt="As above but with specific boxplots for each peer." width="960" />
 <p class="caption">
 Figure 3: As above but with specific boxplots for each peer.
 </p>
@@ -114,7 +114,7 @@ Figure 4: Word counts, n (with stop words removed)
 <div id="htmlwidget-2" style="width:100%;height:auto;" class="datatables html-widget"></div>
 <script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[8,8,8,8,8,8],[10,100,1000,10000,100000,1000000],[0.22314355131421,2.52572864430826,4.8283137373023,7.13089883029635,9.43348392329039,11.7360690162844],[1.25,12.5,125,1250,12500,125000]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Word in X documents<\/th>\n      <th>Total number of documents<\/th>\n      <th>Inverse document frequency (IDF)<\/th>\n      <th>Unlogged IDF<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <div class="figure"><span id="fig:unnamed-chunk-8"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-8-1.png" alt="If a word appears in 8 documents, how does the IDF change as we increase the number of documents?" width="672" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-8-1.png" alt="If a word appears in 8 documents, how does the IDF change as we increase the number of documents?" width="672" />
 <p class="caption">
 Figure 5: If a word appears in 8 documents, how does the IDF change as we increase the number of documents?
 </p>
@@ -129,7 +129,7 @@ Figure 5: If a word appears in 8 documents, how does the IDF change as we increa
 <h4>TF-IDF for the longest speeches</h4>
 <p>Let’s take the six longest speeches, and which words were picked out as the most important ones.</p>
 <div class="figure"><span id="fig:unnamed-chunk-9"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-9-1.png" alt="The words are on the y axis and their TF-IDF is the position of each bar on the x axis. Each panel is a different speech." width="960" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-9-1.png" alt="The words are on the y axis and their TF-IDF is the position of each bar on the x axis. Each panel is a different speech." width="960" />
 <p class="caption">
 Figure 6: The words are on the y axis and their TF-IDF is the position of each bar on the x axis. Each panel is a different speech.
 </p>
@@ -147,7 +147,7 @@ Figure 6: The words are on the y axis and their TF-IDF is the position of each b
 <p>We are going to use TF-IDF as a way to summarise the Hansard. We have seen how this is like pulling important words from a “bag of words” (each speech). The meaning from the context which the words were used in is inevitably lost, but it’s a useful heuristic and the way TF-IDF is calculated is transparent (not a black box).</p>
 <p>Below is a pretty cool graphic (<strong>Open it in a new tab!</strong>), where I’ve extracted the word with the largest TF-IDF from each speech longer than 50 (non-stop-word) words and displayed them chronologically. The size of the word represents its TF-IDF.</p>
 <div class="figure"><span id="fig:unnamed-chunk-11"></span>
-<img src="./post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-11-1.png" alt="The position of words on the y axis is irrelevant! Cheers to Kamil Slowikowski (https://slowkow.com/) for making ggrepel which organises the text so nicely." width="1440" />
+<img src=".././post/2019-02-05-text-mining-the-eu-withdrawal-bill-hansard_files/figure-html/unnamed-chunk-11-1.png" alt="The position of words on the y axis is irrelevant! Cheers to Kamil Slowikowski (https://slowkow.com/) for making ggrepel which organises the text so nicely." width="1440" />
 <p class="caption">
 Figure 7: The position of words on the y axis is irrelevant! Cheers to Kamil Slowikowski (<a href="https://slowkow.com/" class="uri">https://slowkow.com/</a>) for making ggrepel which organises the text so nicely.
 </p>

@@ -1,14 +1,14 @@
-<script src="./rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
-<script src="./rmarkdown-libs/jquery/jquery.min.js"></script>
-<link href="./rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/datatables-binding/datatables.js"></script>
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
-<link href="./rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
-<link href="./rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
-<script src="./rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="fonts.css">
+<script src="../rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="../rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="../rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="../rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="../rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../fonts.css">
 
 <div id="part-1-setting-the-stage" class="section level1">
 <h1>Part 1: Setting the stage</h1>
@@ -32,7 +32,7 @@
 <p>In the house of Lords, each speaker’s name is prefixed by a title- Lord, Baroness, Lady, etc… From this we can infer the gender of the peer. We can also extract their party (provided next to their title). If we wanted to, we could even search for external metadata such as age, or Alma Mater, but for now we will stick exclusively to what we can gleen from the Hansard itself.</p>
 <p>We are starting to build up the backbone of our analysis. To make things clearer, here is a diagram:</p>
 <div class="figure">
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/expl_vs_res2.png" alt="Explanatory and response variables within a Hansard text." />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/expl_vs_res2.png" alt="Explanatory and response variables within a Hansard text." />
 <p class="caption">Explanatory and response variables within a Hansard text.</p>
 </div>
 <p>There is information in the Hansard which we might try to use to explain other data in the Hansard. There are lots of terms for this in statistical lingo but we will say there are explanatory variables which can be used to understand patterns in response variables. Put in context, there might be differences in the number and length of speeches of MPs from different parties, or of different genders. There is also likely to be assocations between some of these factors themselves- different parties will have different proportions of speakers from each gender. Which patterns are meaningful and interesting, and how to separate out the effects of this interacting network of variables, we will come to later. But for now appreciate the depth of things we can look at without even digging into the nature of the text itself.</p>
@@ -40,7 +40,7 @@
 <div id="who-turned-up" class="section level3">
 <h3>Who turned up?</h3>
 <div class="figure"><span id="fig:unnamed-chunk-1"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-1-1.png" alt="CB=crossbench, GP=green party, PC=Privy council, UUP=Ulster Unionists Party" width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-1-1.png" alt="CB=crossbench, GP=green party, PC=Privy council, UUP=Ulster Unionists Party" width="672" />
 <p class="caption">
 Figure 1: CB=crossbench, GP=green party, PC=Privy council, UUP=Ulster Unionists Party
 </p>
@@ -48,7 +48,7 @@ Figure 1: CB=crossbench, GP=green party, PC=Privy council, UUP=Ulster Unionists 
 <p>This figure shows that the majority of MPs belong to the three major parties or <a href="#Crossbench">crossbench</a>, and that the faction with the most MPs present are the Conservatives. I have also coloured in the bars to indicate the proportion of male versus female peers in each party. Needless to say, the vast majority of female representation in the house comes from Labour and the Liberal Democrats.</p>
 <p>To get this data, we have just counted up all the unique speakers, and recorded their party and gender using information from the headers.</p>
 <div class="figure">
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/hans_names.png" alt="The Hansard text as it appears on the Parliamentary Hansard website." />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/hans_names.png" alt="The Hansard text as it appears on the Parliamentary Hansard website." />
 <p class="caption">The Hansard text as it appears on the Parliamentary Hansard website.</p>
 </div>
 <p>A more robust system might combine this scraping with the use of a curated database of current MPs and their associated information, but I’m trying to work exclusively with data from the Hansard for now. This actually touches on a general point I would like to elaborate on in a later article. A publically maintained and curated database could make this process much easier and more accurate. It would cost little to implement and maintain for a voluntary group (or even paid civil servants). The point is, although the Government is getting better at sharing data, there is a general failure to make the data that is shared adequate for research or computational analysis. It’s a kind of quasi-transparency. Simple structures could be put in place to streamline available data into standardised, tidy, well-organised file formats. Instead we often see MPs accounts uploaded as PDFs of scrawled, handwritten receipts; no system to download large batches of available files; or a popular one is publishing a spreadsheet of the processed data, but not the raw data. We are lucky in this case to have access to a plaintext file and not have to web scrape the Hansard for ourselves.</p>
@@ -57,7 +57,7 @@ Figure 1: CB=crossbench, GP=green party, PC=Privy council, UUP=Ulster Unionists 
 <h3>Which MP or group of MPs spoke most often?</h3>
 <p>The next interesting thing to look at might be which party is making the most speeches.</p>
 <div class="figure"><span id="fig:unnamed-chunk-2"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-2-1.png" alt="The red bars are the expected number of speeches, the blue bars are the number of speeches that were actually made." width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-2-1.png" alt="The red bars are the expected number of speeches, the blue bars are the number of speeches that were actually made." width="672" />
 <p class="caption">
 Figure 2: The red bars are the expected number of speeches, the blue bars are the number of speeches that were actually made.
 </p>
@@ -88,7 +88,7 @@ Figure 2: The red bars are the expected number of speeches, the blue bars are th
 <div id="figure-3" class="section level3 tabset">
 <h3>Figure 3</h3>
 <div class="figure"><span id="fig:unnamed-chunk-4"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-4-1.png" alt="The distribution of speech numbers coloured by party." width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-4-1.png" alt="The distribution of speech numbers coloured by party." width="672" />
 <p class="caption">
 Figure 3: The distribution of speech numbers coloured by party.
 </p>
@@ -97,7 +97,7 @@ Figure 3: The distribution of speech numbers coloured by party.
 <div id="figure-4" class="section level3 tabset">
 <h3>Figure 4</h3>
 <div class="figure"><span id="fig:unnamed-chunk-5"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-5-1.png" alt="The distribution of speech numbers as an empirical cumulative distribution function." width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-5-1.png" alt="The distribution of speech numbers as an empirical cumulative distribution function." width="672" />
 <p class="caption">
 Figure 4: The distribution of speech numbers as an empirical cumulative distribution function.
 </p>
@@ -123,7 +123,7 @@ Figure 4: The distribution of speech numbers as an empirical cumulative distribu
 <div id="figure-5" class="section level3 tabset">
 <h3>Figure 5</h3>
 <div class="figure"><span id="fig:unnamed-chunk-7"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-7-1.png" alt="Number of speeches in each quarter (panel) of the Hansard." width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-7-1.png" alt="Number of speeches in each quarter (panel) of the Hansard." width="672" />
 <p class="caption">
 Figure 5: Number of speeches in each quarter (panel) of the Hansard.
 </p>
@@ -132,7 +132,7 @@ Figure 5: Number of speeches in each quarter (panel) of the Hansard.
 <div id="figure-6" class="section level3 tabset">
 <h3>Figure 6</h3>
 <div class="figure"><span id="fig:unnamed-chunk-8"></span>
-<img src="post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-8-1.png" alt="As above but y values are speeches as proportion of total speeches made by each party." width="672" />
+<img src="../post/2019-02-04-hansard-text-analysis-part-1_files/figure-html/unnamed-chunk-8-1.png" alt="As above but y values are speeches as proportion of total speeches made by each party." width="672" />
 <p class="caption">
 Figure 6: As above but y values are speeches as proportion of total speeches made by each party.
 </p>
